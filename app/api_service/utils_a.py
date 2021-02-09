@@ -1,3 +1,6 @@
+from joblib import load
+
+
 def prepareJsonResponse(document: dict) -> dict:
     _id = document.pop("_id", None)
     timestamp = document.pop("timestamp", None)
@@ -6,3 +9,15 @@ def prepareJsonResponse(document: dict) -> dict:
     if timestamp:
         document["timestamp"] = str(timestamp)
     return document
+
+
+def makePrediction(ingredients: list) -> list:
+    """Use the model generated to make predictions on the list
+
+    :param ingredients: ingredients list
+    :type ingredients: list
+    :return: list of predictions indexed to ingredients list
+    :rtype: list
+    """
+    model = load("model.joblib")
+    return model.predict(ingredients)

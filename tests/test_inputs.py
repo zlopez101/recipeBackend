@@ -1,9 +1,34 @@
 import pytest
 
 
-def test_send_a_message(test_client):
-    pass
+def test_messaging(test_client):
+    # from a non-user
+    response = test_client.post(
+        "/msg",
+        data=dict(From="+11234567890", Body="sign me up"),
+        follow_redirects=True,
+    )
+    assert (
+        b"Hello! Looks like you are a new user, please use the link to sign up for our service. Thanks!"
+        in response.data
+    )
 
+    # from a user but not sending a url
+    response = test_client.post(
+        "/msg",
+        data=dict(From="+17134306973", Body="sign me up", follow_redirects=True),
+    )
+    assert b"What do you want?" in response.data
 
-def test_receive_a_message(test_client):
-    pass
+    # go straight there
+    # from a user sending a url
+    response = test_client.post(
+        "/msg",
+        data=dict(
+            From="+17134306973",
+            Body="https://www.halfbakedharvest.com/queso-fundido-taquitos/",
+            follow_redirects=True,
+        ),
+    )
+    # print(response.data)
+    assert b"was added to your recipes!" in response.data

@@ -12,37 +12,55 @@ def receiveMsg():
     _from = request.values.get("From")
     msg = request.values.get("Body", None)
 
-    userId = str(pymongo.db.users.find_one(dict(phone_number=_from))._id)
+    User = pymongo.db.users.find_one(dict(phone_number=_from))
     if not User:
-        redirect(url_for("sendMessage", _from=_from))
+        return redirect(url_for(".sendMessage"))
+    userId = str(User["_id"])
 
     # is it a url
     if msg.startswith("http"):
-        return redirect(url_for(".addRecipe", userId=userId, url=msg, _from=_from))
+        recipeInfo = getRecipe(msg, userId)
+        pymongo.db.recipes.insert_one(recipeInfo)
+        return f"{recipeInfo['name']}was added to your recipes!"
 
     # recipe requests
+    else:
+        response = MessagingResponse()
+        response.message("What do you want?")
+        return str(response)
 
 
 @phone.route("/new_user")
 def sendMessage():
     """Send the sign up link to the requestor"""
     response = MessagingResponse()
-    response.message(b)
-    pass
+    response.message(
+        f"Hello! Looks like you are a new user, please use the link to sign up for our service. Thanks!"
+    )
+    return str(response)
 
 
-@phone.route("/addRecipe/<userId>")
-def addRecipe(userId: str, url: str) -> MessagingResponse:
+@phone.route("/createRecipe")
+def create():
+    """[summary]
+
+    :return: [description]
+    :rtype: [type]
+    """
+    return "hello world"
+
+
+@phone.route("/addrecipe/")
+def addrecipe():
     """Add a recipe to user's list
 
     :param userId: userId retrieve from user phone number
     :type userId: str
     :param url: url sent by user
     :type url: str
-    :return: Message for twilio to respond with
-    :rtype: MessagingResponse
     """
-    recipeInfo = getRecipe(url, userId)
-    pymongo.db.recipes.insert_one(recipeInfo)
-    response = MessagingResponse()
-    response.message(body="This is the message")
+
+    # recipeInfo = getRecipe(url, userId)
+    # pymongo.db.recipes.insert_one(recipeInfo)
+    return "hello world"
+
