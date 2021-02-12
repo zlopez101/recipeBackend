@@ -60,7 +60,8 @@ def addrecipe():
     :type url: str
     """
 
-    # recipeInfo = getRecipe(url, userId)
-    # pymongo.db.recipes.insert_one(recipeInfo)
-    return "hello world"
+    recipeInfo = getRecipe(url, userId)
+    # return redirect(url_for("api_service.RecipeList"))s
+    pymongo.db.recipes.insert_one(recipeInfo)
+    return "hello"
 

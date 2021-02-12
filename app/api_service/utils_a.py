@@ -19,5 +19,5 @@ def makePrediction(ingredients: list) -> list:
     :return: list of predictions indexed to ingredients list
     :rtype: list
     """
-    model = load("model.joblib")
+    model = load(r"app\api_service\model.joblib")
     return model.predict(ingredients)

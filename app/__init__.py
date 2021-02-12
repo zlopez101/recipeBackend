@@ -8,8 +8,9 @@ def create_app(config_class=Configuration):
     """Application Factory for the recipe app"""
 
     app = Flask(__name__)
-    CORS(app)
+    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
     app.config.from_object(config_class)
+    app.config["CORS_HEADERS"] = "Content-Type"
     pymongo.init_app(app)
 
     from app.api_service import apiService

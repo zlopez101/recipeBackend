@@ -34,51 +34,42 @@ class GroceryList(Resource):
     """Recieve a post request from the frontend, and respond with the sorted grocery list"""
 
     def post(self):
-        ingredients = request.values.get("ingredients")
-        if not (ingredients):
-            return 400
-        preds = makePrediction(ingredients)
-        results = list(zip(ingredients, preds))
-        return jsonify(results), 201
+        ingredients = json.loads(request.data)["ingredients"]
+        preds = makePrediction([item["ingredient"] for item in ingredients])
+        dct = {}
+        labels = set(preds)
+        for label in labels:
+            dct[label] = []
+        for ingredient, pred in zip(ingredients, preds):
+            dct[pred].append(ingredient)
+        return dct
 
 
 class RecipeList(Resource):
     """Get all the recipes for the user, or allow the user to create a new recipe"""
 
     def get(self):
+        """Get all the recipes for the user
+
+        :return: list of recipe objects( dict with keys of ['id', 'ingredients', 'name', 'source', 'url', 'userId'])
+        :rtype: list
+        """
         user = pymongo.db.users.find_one({"_id": ObjectId("5febad07b771396bbea8d358")})
         recipes = pymongo.db.recipes.find({"userId": "5febad07b771396bbea8d358"})
 
         return jsonify([prepareJsonResponse(recipe) for recipe in recipes])
 
     def post(self):
-        # DELETED = {
-        #     "userId": "5febad07b771396bbea8d358",
-        #     "url": "https://www.halfbakedharvest.com/buffalo-chicken-pizza/",
-        #     "name": "sheet pan buffalo chicken pizza",
-        #     "source": "HalfBakedHarvest",
-        #     "ingredients": [
-        #         "1/2 pound pizza dough, homemade or store-bought",
-        #         "1 cup cooked shredded chicken",
-        #         "1/2 cup buffalo sauce (homemade sauce in notes)",
-        #         "2 tablespoons chopped fresh chives",
-        #         "2 teaspoons dried parsley",
-        #         "1 teaspoon dried dill",
-        #         "1/2 cup fresh cilantro or parsley, chopped",
-        #         "1-2 cloves garlic, grated",
-        #         "1/2-1 teaspoon fennel seeds",
-        #         "1 pinch red pepper flakes",
-        #         "1/3 cup ranch dressing (homemade sauce in notes)",
-        #         "1/4 cup crumbled blue cheese (optional)",
-        #         "1 cup shredded whole milk mozzarella",
-        #         "1 cup shredded cheddar cheese",
-        #         "1/2 cup grated parmesan or asiago cheese",
-        #     ],
-        # }
+        """Create a recipe for the user
+
+        :return: new recipe id
+        :rtype: str
+        """
         newRecipe = dict(request.values)
         newRecipe = pymongo.db.recipes.insert_one(newRecipe)
         return str(newRecipe.inserted_id), 201
 
 
-api.add_resource(Recipe, "/recipe/<_id>")
-api.add_resource(RecipeList, "/recipes")
+api.add_resource(Recipe, "/api/recipe/<_id>")
+api.add_resource(RecipeList, "/api/recipes")
+api.add_resource(GroceryList, "/api/groceryList")
