@@ -13,6 +13,10 @@ def create_app(config_class=Configuration):
     app.config["CORS_HEADERS"] = "Content-Type"
     pymongo.init_app(app)
 
+    @app.route("/")
+    def home():
+        return "Hello World!"
+
     from app.api_service import apiService
     from app.input_service.phone import phone
 

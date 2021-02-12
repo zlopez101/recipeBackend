@@ -19,9 +19,6 @@ itsdangerous==1.1.0
 Jinja2==2.11.3
 joblib==1.0.0
 MarkupSafe==1.1.1
-mkl-fft==1.0.14
-mkl-random==1.0.4
-mkl-service==2.3.0
 mypy-extensions==0.4.3
 numpy==1.19.2
 pathspec==0.7.0
@@ -36,7 +33,6 @@ regex==2020.11.13
 requests==2.25.1
 scikit-learn==0.23.2
 scipy==1.5.2
-setuptools==52.0.0.post20210125
 six==1.15.0
 soupsieve==2.2
 threadpoolctl==2.1.0
