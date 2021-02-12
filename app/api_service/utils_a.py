@@ -1,4 +1,5 @@
 from joblib import load
+from sys import platform
 
 
 def prepareJsonResponse(document: dict) -> dict:
@@ -19,5 +20,9 @@ def makePrediction(ingredients: list) -> list:
     :return: list of predictions indexed to ingredients list
     :rtype: list
     """
-    model = load(r"app\api_service\model.joblib")
+    if platform == "win32":
+        model_filename = r"app\api_service\model.joblib"
+    else:
+        model_filename = "app/api_service/model.joblib"
+    model = load(model_filename)
     return model.predict(ingredients)
