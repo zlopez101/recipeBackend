@@ -9,3 +9,5 @@ This module handles the API calls made by the `Vue` App. Created using the `flas
 ## input_service
 
 Will handle twilio/email integrations. Future plans for as many integrations as possible.
+mkl-fft==1.2.0
+`pip list --format=freeze`
