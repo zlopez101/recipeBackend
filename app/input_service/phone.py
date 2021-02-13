@@ -1,6 +1,6 @@
 from flask import Blueprint, request, redirect, url_for
 from app.db import pymongo
-from .utils_i import getRecipe
+from app.utils import getRecipe
 from twilio.twiml.messaging_response import MessagingResponse
 
 phone = Blueprint("phone", __name__)

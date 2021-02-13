@@ -4,6 +4,7 @@ import json
 from app.db import pymongo
 from bson import ObjectId
 from .utils_a import prepareJsonResponse, makePrediction
+from app.utils import getRecipe
 
 apiService = Blueprint("api_service", __name__)
 api = Api(apiService)
@@ -65,9 +66,14 @@ class RecipeList(Resource):
         :return: new recipe id
         :rtype: str
         """
-        newRecipe = dict(request.values)
-        newRecipe = pymongo.db.recipes.insert_one(newRecipe)
-        return str(newRecipe.inserted_id), 201
+
+        recipeURL = json.loads(request.data).get("url")
+
+        if not recipeURL:
+            return "Please supply a recipe url"
+        recipe = getRecipe(recipeURL, "5febad07b771396bbea8d358")
+        newRecipe = pymongo.db.recipes.insert_one(recipe)
+        return str(newRecipe.inserted_id)
 
 
 api.add_resource(Recipe, "/api/recipe/<_id>")

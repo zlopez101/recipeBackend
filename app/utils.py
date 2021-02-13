@@ -116,7 +116,3 @@ def getRecipe(url: str, userId: str) -> dict:
     return dict(
         name=title, source=source, ingredients=ingredients, url=url, userId=userId
     )
-
-
-if __name__ == "__main__":
-    print(getRecipe("https://www.halfbakedharvest.com/spanakopita-melt"))
