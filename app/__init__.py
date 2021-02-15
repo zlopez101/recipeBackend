@@ -1,25 +1,38 @@
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
+from flask_bcrypt import Bcrypt
 from app.config import Configuration
-from app.db import pymongo
+import app.db
+
+bcrypt = Bcrypt()
 
 
 def create_app(config_class=Configuration):
     """Application Factory for the recipe app"""
 
-    app = Flask(__name__)
-    cors = CORS(app, resources={r"/api/*": {"origins": "*"}})
-    app.config.from_object(config_class)
-    app.config["CORS_HEADERS"] = "Content-Type"
-    pymongo.init_app(app)
+    myapp = Flask(__name__)
+    cors = CORS(myapp, resources={r"/api/*": {"origins": "*"}})
+    myapp.config.from_object(config_class)
+    myapp.config["CORS_HEADERS"] = "Content-Type"
+    app.db.pymongo.init_app(myapp)
 
-    @app.route("/")
+    @myapp.route("/")
     def home():
         return "Hello World!"
 
-    from app.api_service import apiService
-    from app.input_service.phone import phone
+    from app.auth import AuthError
 
-    app.register_blueprint(apiService)
-    app.register_blueprint(phone)
-    return app
+    @myapp.errorhandler(AuthError)
+    def handle_error(ex):
+        response = jsonify(ex.error)
+        response.status_code = ex.status_code
+        return response
+
+    from app.recipe_service import recipeService
+    from app.input_service import inputService
+    from app.user_service import userService
+
+    myapp.register_blueprint(recipeService)
+    myapp.register_blueprint(inputService)
+    myapp.register_blueprint(userService)
+    return myapp

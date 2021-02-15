@@ -1,13 +1,13 @@
 from flask import Blueprint, request, jsonify
 from flask_restful import Api, Resource, reqparse, abort
 import json
-from app.db import pymongo
+from app.models import RecipeController
 from bson import ObjectId
-from .utils_a import prepareJsonResponse, makePrediction
+from .utils_a import makePrediction
 from app.utils import getRecipe
 
-apiService = Blueprint("api_service", __name__)
-api = Api(apiService)
+recipeService = Blueprint("recipe_service", __name__)
+api = Api(recipeService)
 
 
 def abortIfRecipeDoesNotExist(_id: str):
@@ -23,12 +23,15 @@ class Recipe(Resource):
     """Get a specific recipe provided by _id parameter"""
 
     def get(self, _id):
-        recipe = pymongo.db.recipes.find_one_or_404({"_id": ObjectId(_id)})
-        return jsonify(prepareJsonResponse(recipe))
+        return RecipeController.getRecipe(_id)
+        # recipe = pymongo.db.recipes.find_one_or_404({"_id": ObjectId(_id)})
+        # return jsonify(prepareJsonResponse(recipe))
 
     def delete(self, _id):
-        deleted = pymongo.db.recipes.delete_one({"_id": ObjectId(_id)})
-        return "", 204
+        RecipeController.deleteRecipe(_id)
+        # deleted = pymongo.db.recipes.delete_one({"_id": ObjectId(_id)})
+
+        # return "", 204
 
 
 class GroceryList(Resource):
@@ -55,10 +58,12 @@ class RecipeList(Resource):
         :return: list of recipe objects( dict with keys of ['id', 'ingredients', 'name', 'source', 'url', 'userId'])
         :rtype: list
         """
-        user = pymongo.db.users.find_one({"_id": ObjectId("5febad07b771396bbea8d358")})
-        recipes = pymongo.db.recipes.find({"userId": "5febad07b771396bbea8d358"})
+        # user = pymongo.db.users.find_one({"_id": ObjectId("5febad07b771396bbea8d358")})
+        # recipes = pymongo.db.recipes.find({"userId": "5febad07b771396bbea8d358"})
 
-        return jsonify([prepareJsonResponse(recipe) for recipe in recipes])
+        # return jsonify([prepareJsonResponse(recipe) for recipe in recipes])
+
+        return jsonify(RecipeController.getRecipes("5febad07b771396bbea8d358"))
 
     def post(self):
         """Create a recipe for the user
@@ -72,8 +77,9 @@ class RecipeList(Resource):
         if not recipeURL:
             return "Please supply a recipe url"
         recipe = getRecipe(recipeURL, "5febad07b771396bbea8d358")
-        newRecipe = pymongo.db.recipes.insert_one(recipe)
-        return str(newRecipe.inserted_id)
+        # newRecipe = pymongo.db.recipes.insert_one(recipe)
+        # return str(newRecipe.inserted_id)
+        return RecipeController.createRecipe(recipe)
 
 
 api.add_resource(Recipe, "/api/recipe/<_id>")

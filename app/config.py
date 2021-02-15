@@ -5,7 +5,7 @@ mongo_pass = os.environ.get("MONGO_DB")
 
 class Configuration:
 
-    SECRET_KEY = os.urandom(32)
+    SECRET_KEY = os.environ.get("FLASK_APP_BUILDING_KEY")
     MONGO_URI = (
         "mongodb+srv://zach:"
         + mongo_pass
@@ -20,7 +20,7 @@ class Configuration:
 
 class TestingConfiguration:
 
-    SECRET_KEY = os.urandom(32)
+    SECRET_KEY = os.environ.get("FLASK_APP_BUILDING_KEY")
     MONGO_URI = (
         "mongodb+srv://zach:"
         + mongo_pass
