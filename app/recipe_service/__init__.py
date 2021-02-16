@@ -1,4 +1,5 @@
 from flask import Blueprint, request, jsonify
+from flask.views import MethodView
 
 # from flask_restful import Api, Resource, reqparse, abort
 import json
@@ -13,118 +14,41 @@ from app.auth import auth_required
 recipeService = Blueprint("recipe_service", __name__)
 
 
-@recipeService.route("/api/recipe/<recipeId>", methods=["GET", "PUT", "DELETE"])
-@auth_required
-def recipe(token, recipeId):
-    """[summary]
+class RecipeAPI(MethodView):
+    def get(self, userId, recipeId):
+        if recipeId is None:
+            # return a list of recipes
+            return jsonify(RecipeController.getRecipes(userId))
+        else:
+            # expose a single recipe
+            return RecipeController.getRecipe(recipeId)
 
-    :param recipeId: [description]
-    :type recipeId: [type]
-    :return: [description]
-    :rtype: [type]
-    """
-
-    if request.method == "GET":
-        return RecipeController.getRecipe(recipeId)
-
-    if request.method == "PUT":
-        return "PUT"
-    if request.method == "DELETE":
-        RecipeController.deleteRecipe(recipeId)
-        return "DELETE"
-
-
-@recipeService.route("/api/recipes", methods=["GET", "POST"])
-@auth_required
-def recipes(userId):
-
-    if request.method == "GET":
-        return jsonify(RecipeController.getRecipes(userId))
-
-    if request.method == "POST":
+    def post(
+        self, userId,
+    ):
+        # create a new recipe
         recipeURL = request.get_json()["url"]
         recipe = getRecipe(recipeURL, userId)
         return RecipeController.createRecipe(recipe)
 
+    def delete(self, userId, recipeId):
+        # delete a single recipe
+        RecipeController.deleteRecipe(recipeId)
+        return "deleted"
 
-@recipeService.route("/api/groceryList", methods=["POST"])
-@auth_required
-def groceryList(userId):
-
-    ingredients = request.get_json(["ingredients"])
-    preds = makePrediction([item["ingredient"] for item in ingredients])
-    dct = {}
-    labels = set(preds)
-    for label in labels:
-        dct[label] = []
-    for ingredient, pred in zip(ingredients, preds):
-        dct[pred].append(ingredient)
-    return dct
+    def put(self, userId, recipeId):
+        # update a single recipe
+        pass
 
 
-# class Recipe(Resource):
-#     """Get a specific recipe provided by _id parameter"""
-
-#     def get(self, _id):
-#         return RecipeController.getRecipe(_id)
-#         # recipe = pymongo.db.recipes.find_one_or_404({"_id": ObjectId(_id)})
-#         # return jsonify(prepareJsonResponse(recipe))
-
-#     def delete(self, _id):
-#         RecipeController.deleteRecipe(_id)
-#         # deleted = pymongo.db.recipes.delete_one({"_id": ObjectId(_id)})
-
-#         # return "", 204
-
-
-# class GroceryList(Resource):
-#     """Recieve a post request from the frontend, and respond with the sorted grocery list"""
-
-#     def post(self):
-#         ingredients = json.loads(request.data)["ingredients"]
-#         preds = makePrediction([item["ingredient"] for item in ingredients])
-#         dct = {}
-#         labels = set(preds)
-#         for label in labels:
-#             dct[label] = []
-#         for ingredient, pred in zip(ingredients, preds):
-#             dct[pred].append(ingredient)
-#         return dct
-
-
-# class RecipeList(Resource):
-#     """Get all the recipes for the user, or allow the user to create a new recipe"""
-
-#     def get(self):
-#         """Get all the recipes for the user
-
-#         :return: list of recipe objects( dict with keys of ['id', 'ingredients', 'name', 'source', 'url', 'userId'])
-#         :rtype: list
-#         """
-#         # user = pymongo.db.users.find_one({"_id": ObjectId("5febad07b771396bbea8d358")})
-#         # recipes = pymongo.db.recipes.find({"userId": "5febad07b771396bbea8d358"})
-
-#         # return jsonify([prepareJsonResponse(recipe) for recipe in recipes])
-
-#         return jsonify(RecipeController.getRecipes("5febad07b771396bbea8d358"))
-
-#     def post(self):
-#         """Create a recipe for the user
-
-#         :return: new recipe id
-#         :rtype: str
-#         """
-
-#         recipeURL = json.loads(request.data).get("url")
-
-#         if not recipeURL:
-#             return "Please supply a recipe url"
-#         recipe = getRecipe(recipeURL, "5febad07b771396bbea8d358")
-#         # newRecipe = pymongo.db.recipes.insert_one(recipe)
-#         # return str(newRecipe.inserted_id)
-#         return RecipeController.createRecipe(recipe)
-
-
-# api.add_resource(Recipe, "/api/recipe/<_id>")
-# api.add_resource(RecipeList, "/api/recipes")
-# api.add_resource(GroceryList, "/api/groceryList")
+recipe_view = auth_required(RecipeAPI.as_view("recipes"))
+recipeService.add_url_rule(
+    "/api/recipes",
+    defaults={"recipeId": None},
+    view_func=recipe_view,
+    methods=["GET",],
+)
+recipeService.add_url_rule("/api/recipes", view_func=recipe_view, methods=["POST",])
+recipeService.add_url_rule(
+    "/api/recipes/<recipeId>", view_func=recipe_view, methods=["GET", "PUT", "DELETE"]
+)

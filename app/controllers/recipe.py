@@ -3,11 +3,6 @@ from bson import ObjectId
 import app.db
 
 
-class Recipe(baseController):
-
-    pass
-
-
 class RecipeController(baseController):
     @staticmethod
     def getRecipe(_id: str) -> dict:

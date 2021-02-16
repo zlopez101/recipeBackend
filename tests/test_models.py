@@ -1,7 +1,6 @@
 import pytest
-from app.models import *
 from tests.modelTesting import *
-from app.controllers.user import UserController
+from app.controllers import RecipeController, UserController
 
 
 def test_Recipes(models):
@@ -25,19 +24,6 @@ def test_Recipes(models):
 
     recipes = RecipeController.getRecipes(12345678)
     assert len(recipes) == 3, "All 3 recipes are in the database"
-
-
-def test_Users(models):
-    Jim, Kim = Users()
-    jim_id = User.createFromRegistration(Jim)
-    # try to login Jim with password
-    # correct password
-    jimsAPICall = {"email": Jim["email"], "password": Jim["password"]}
-    token = User.login(jimsAPICall)
-    possibly_jims_id = User.decodeToken(token)
-    assert jim_id == possibly_jims_id, "did we find the right id?"
-
-    # try to login Jim with password
 
 
 def test_controller(models):

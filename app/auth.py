@@ -1,6 +1,6 @@
 from flask import request, abort
 from functools import wraps
-from app.models import User
+from app.controllers import UserController
 
 
 class AuthError(Exception):
@@ -53,7 +53,7 @@ def auth_required(func):
     @wraps(func)
     def route_wrapper(*args, **kwargs):
         token = get_token_auth_header()
-        userId = User.decodeToken(token)
+        userId = UserController.decodeToken(token)
         return func(userId, *args, **kwargs)
 
     return route_wrapper
