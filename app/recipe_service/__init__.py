@@ -2,7 +2,9 @@ from flask import Blueprint, request, jsonify
 
 # from flask_restful import Api, Resource, reqparse, abort
 import json
-from app.models import RecipeController
+from app.controllers.recipe import RecipeController
+
+# from app.models import RecipeController
 from bson import ObjectId
 from .utils_a import makePrediction
 from app.utils import getRecipe

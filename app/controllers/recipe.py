@@ -1,21 +1,14 @@
 from .baseController import baseController
+from bson import ObjectId
+import app.db
 
 
 class Recipe(baseController):
 
-    attributes = ["id", "ingredients", "name", "source", "url", "userId"]
-
-    def __init__(self, kwargs):
-        super().__init__(kwargs)
-
-    def __repr__(self):
-        return f"Recipe(ID: {self.id}, {self.name})"
-
-    def __str__(self):
-        return self.name
+    pass
 
 
-class RecipeController:
+class RecipeController(baseController):
     @staticmethod
     def getRecipe(_id: str) -> dict:
         """Get a single recipe
@@ -25,7 +18,7 @@ class RecipeController:
         :return: dict with dict.keys(["id", "ingredients", "name", "source", "url", "userId"])
         :rtype: dict
         """
-        return processResponse(
+        return baseController.processResponse(
             app.db.pymongo.db.recipes.find_one({"_id": ObjectId(_id)})
         )
 
@@ -40,7 +33,7 @@ class RecipeController:
         # {"_id": ObjectId("5febad07b771396bbea8d358")}
         # )
         recipes = app.db.pymongo.db.recipes.find({"userId": userId})
-        result = [processResponse(recipe) for recipe in recipes]
+        result = [baseController.processResponse(recipe) for recipe in recipes]
         return result
 
     @staticmethod
