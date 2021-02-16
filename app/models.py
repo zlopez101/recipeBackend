@@ -15,8 +15,11 @@ def processResponse(document: dict) -> dict:
     :return: json-ready dict
     :rtype: dict
     """
-    document["id"] = str(document.pop("_id", None))
-    return document
+    if document:
+        document["id"] = str(document.pop("_id", None))
+        return document
+    else:
+        raise LookupError("Your query did not have any matching documents")
 
 
 class RecipeController:
@@ -90,12 +93,12 @@ class User:
         :return: token supplied by `User.encodeToken` method
         :rtype: str
         """
-        user = User.getUser({"email": suppliedUserData.get("email")})
+        user = User.get({"email": suppliedUserData.get("email")})
         if bcrypt.check_password_hash(user["password"], suppliedUserData["password"]):
             return User.encodeToken(user["id"])
 
     @staticmethod
-    def createUser(userObj: dict) -> str:
+    def createFromRegistration(userObj: dict) -> str:
         """register a new user
 
         :param userObj: dict with keys from Vue frontend
@@ -109,7 +112,7 @@ class User:
         return str(newUser.inserted_id)
 
     @staticmethod
-    def getUser(data: dict) -> dict:
+    def get(data: dict) -> dict:
         """retrieve a user from database
 
         :return: user instance based on phone number
@@ -131,7 +134,7 @@ class User:
             "iat": datetime.utcnow(),
             "userID": userId,
         }
-        return jwt.encode(payload, User.key, algorithm="HS256")
+        return jwt.encode(payload, User.key, algorithm="HS256").decode("utf-8")
 
     @staticmethod
     def decodeToken(token: str) -> str:

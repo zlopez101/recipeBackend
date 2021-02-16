@@ -32,10 +32,14 @@ def test_client(monkeysession):
 
 
 @pytest.fixture(scope="module")
-def addModels(test_client):
+def addUser(test_client):
     """add test data
     """
-    pass
+    from tests.modelTesting import Users
+
+    Jim, _ = Users()
+    headers = {"content-type": "application/json"}
+    test_client.post("/register", headers=headers, json=Jim)
 
 
 @pytest.fixture(scope="module")

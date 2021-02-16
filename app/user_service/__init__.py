@@ -1,38 +1,42 @@
 from flask import Blueprint, request, redirect, url_for
-from app.models import User
+from bson import ObjectId
+from app.controllers.user import UserController
 import json
 from .utils import validate_json
 
-# from app.auth import auth_required
+from app.auth import auth_required
 
 userService = Blueprint("user_service", __name__)
 
 
+@userService.route("/api/register", methods=["POST"])
 @validate_json("email", "password", "fname", "lname", "phone_number")
-@userService.route("/register", methods=["GET", "POST"])
 def register():
     userData = request.get_json()
-    print(userData)
-    return User.createUser(userData)
+    return UserController.createFromRegistration(userData)
 
 
+@userService.route("/api/login", methods=["POST"])
 @validate_json("email", "password")
-@userService.route("/login")
 def login():
-    return User.login(request.get_json())
+    user = UserController.fromLogin(request.get_json())
+    return user.encodeToken()
 
 
-@userService.route("/logout")
-def logout():
-    pass
+@userService.route("/api/logout", methods=["POST"])
+@auth_required
+def logout(userId):
+    # print(userId)
+    user = UserController.getFromId(userId)
+    return f"{user} signed out!"
 
 
-@userService.route("/account")
+@userService.route("/api/account")
 def account():
     pass
 
 
-@userService.route("/settings")
+@userService.route("/api/settings")
 def settings():
     pass
 

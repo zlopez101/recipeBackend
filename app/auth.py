@@ -53,8 +53,8 @@ def auth_required(func):
     @wraps(func)
     def route_wrapper(*args, **kwargs):
         token = get_token_auth_header()
-        token = User.decodeToken(token)
-        return func(token, *args, **kwargs)
+        userId = User.decodeToken(token)
+        return func(userId, *args, **kwargs)
 
     return route_wrapper
 
