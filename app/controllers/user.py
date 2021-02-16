@@ -56,19 +56,19 @@ class UserController(baseController):
         if bcrypt.check_password_hash(user["password"], suppliedUserData["password"]):
             return cls(user)
 
-    @staticmethod
-    def createFromRegistration(userObj: dict) -> str:
+    @classmethod
+    def createFromRegistration(cls, userObj: dict):
         """register a new user
 
         :param userObj: dict with keys from Vue frontend
         :type userObj: dict
-        :return: id of created user     
-        :rtype: str
+        :return: UserController instance
+        :rtype: UserController
         """
         user = userObj.copy()
         user["password"] = bcrypt.generate_password_hash(user.pop("password"))
-        newUser = app.db.pymongo.db.users.insert_one(user)
-        return str(newUser.inserted_id)
+        app.db.pymongo.db.users.insert_one(user)
+        return cls(UserController.processResponse(user))
 
     @staticmethod
     def get(data: dict) -> dict:

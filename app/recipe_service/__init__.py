@@ -1,7 +1,6 @@
 from app.auth import auth_required
 from app.controllers.recipe import RecipeController
-from app.utils import getRecipe
-
+from app.utils import getRecipe, validate_json
 from bson import ObjectId
 from flask import Blueprint, jsonify, request
 from flask.views import MethodView
@@ -36,6 +35,21 @@ class RecipeAPI(MethodView):
     def put(self, userId, recipeId):
         # update a single recipe
         pass
+
+
+@recipeService.route("/groceryList", methods=["POST"])
+@auth_required
+def groceryList(userId):
+
+    ingredients = request.get_json()["ingredients"]
+    preds = makePrediction([item["ingredient"] for item in ingredients])
+    dct = {}
+    labels = set(preds)
+    for label in labels:
+        dct[label] = []
+    for ingredient, pred in zip(ingredients, preds):
+        dct[pred].append(ingredient)
+    return dct
 
 
 recipe_view = auth_required(RecipeAPI.as_view("recipes"))

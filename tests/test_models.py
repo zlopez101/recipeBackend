@@ -33,7 +33,7 @@ def test_controller(models):
     jimInDB = UserController.createFromRegistration(Jim)
 
     # use the getFromId method
-    jim = UserController.getFromId(jimInDB)
+    jim = UserController.getFromId(jimInDB.id)
     assert isinstance(jim, UserController)
     assert str(jim) == "Jim Bob"
 
@@ -55,6 +55,6 @@ def test_controller(models):
     kimInDB = UserController.createFromRegistration(Kim)
 
     # use the getFromId method
-    kim = UserController.getFromId(kimInDB)
+    kim = UserController.getFromId(kimInDB.id)
     assert isinstance(kim, UserController)
     assert str(kim) == "Kim Sue"

@@ -2,7 +2,7 @@ from flask import Blueprint, request, redirect, url_for
 from bson import ObjectId
 from app.controllers.user import UserController
 import json
-from .utils import validate_json
+from app.utils import validate_json
 
 from app.auth import auth_required
 
@@ -12,8 +12,8 @@ userService = Blueprint("user_service", __name__)
 @userService.route("/api/register", methods=["POST"])
 @validate_json("email", "password", "fname", "lname", "phone_number")
 def register():
-    userData = request.get_json()
-    return UserController.createFromRegistration(userData)
+    user = UserController.createFromRegistration(request.get_json())
+    return user.encodeToken()
 
 
 @userService.route("/api/login", methods=["POST"])

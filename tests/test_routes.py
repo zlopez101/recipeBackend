@@ -33,9 +33,6 @@ def test_recipe_routes(test_client):
         b"25 Minute Korean Bulgogi BBQ Chicken with Spicy Garlic Butter Corn. "
         in JimsRecipes.data
     ), "proper recipe needed to be added"
-    assert (
-        clientId.data in JimsRecipes.data
-    ), "Recipe list should belong to the only client"
     assert firstRecipeId.data in JimsRecipes.data, "Recipe should the same ID"
 
     # add another recipe to client (Jim)'s list
