@@ -37,12 +37,11 @@ class RecipeAPI(MethodView):
         pass
 
 
-@recipeService.route("/groceryList", methods=["POST"])
+@recipeService.route("/api/groceryList", methods=["POST"])
 @auth_required
 def groceryList(userId):
-
     ingredients = request.get_json()["ingredients"]
-    preds = makePrediction([item["ingredient"] for item in ingredients])
+    preds = makePrediction(ingredients)
     dct = {}
     labels = set(preds)
     for label in labels:

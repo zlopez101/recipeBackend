@@ -20,13 +20,13 @@ def create_app(config_class=Configuration):
     def home():
         return "Hello World!"
 
-    from app.auth import AuthError
+    # from app.auth import AuthError
 
-    @myapp.errorhandler(AuthError)
-    def handle_error(ex):
-        response = jsonify(ex.error)
-        response.status_code = ex.status_code
-        return response
+    # @myapp.errorhandler(AuthError)
+    # def handle_error(ex):
+    #     response = jsonify(ex.error)
+    #     response.status_code = ex.status_code
+    #     return response
 
     from app.recipe_service import recipeService
     from app.input_service import inputService
