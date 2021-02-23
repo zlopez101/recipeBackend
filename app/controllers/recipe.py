@@ -5,6 +5,22 @@ import app.db
 
 class RecipeController(baseController):
     @staticmethod
+    def createIngredientObj(recipe: dict) -> dict:
+        """New method for storing inactive objects in the frontend will be in the store
+
+        :param recipe: the result from database query
+        :type recipe: dict
+        :return: altered result with ingredients array of object ingredients
+        :rtype: dict
+        """
+        ingredient = {"active": True, "from": recipe.get("name")}
+        recipe["newIngredient"] = [
+            ingredient.update({"ingredient": ingred})
+            for ingred in recipe["ingredients"]
+        ]
+        return recipe
+
+    @staticmethod
     def getRecipe(_id: str) -> dict:
         """Get a single recipe
 
@@ -13,9 +29,22 @@ class RecipeController(baseController):
         :return: dict with dict.keys(["id", "ingredients", "name", "source", "url", "userId"])
         :rtype: dict
         """
-        return baseController.processResponse(
+        result = baseController.processResponse(
             app.db.pymongo.db.recipes.find_one({"_id": ObjectId(_id)})
         )
+
+        result["newIngredients"] = []
+        for index, ingredient in enumerate(result["ingredients"]):
+            result["newIngredients"].append(
+                {
+                    "ingredient": ingredient,
+                    "active": True,
+                    "from": result["id"],
+                    "id": index,
+                }
+            )
+        result["ingredients"] = result.pop("newIngredients")
+        return result
 
     @staticmethod
     def getRecipes(userId) -> list:
@@ -28,7 +57,21 @@ class RecipeController(baseController):
         # {"_id": ObjectId("5febad07b771396bbea8d358")}
         # )
         recipes = app.db.pymongo.db.recipes.find({"userId": userId})
+
         result = [baseController.processResponse(recipe) for recipe in recipes]
+
+        for recipe in result:
+            recipe["newIngredients"] = []
+            for index, ingredient in enumerate(recipe["ingredients"]):
+                recipe["newIngredients"].append(
+                    {
+                        "ingredient": ingredient,
+                        "active": True,
+                        "from": recipe["id"],
+                        "id": recipe["id"] + " " + str(index),
+                    }
+                )
+            recipe["ingredients"] = recipe.pop("newIngredients")
         return result
 
     @staticmethod

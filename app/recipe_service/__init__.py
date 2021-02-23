@@ -41,7 +41,7 @@ class RecipeAPI(MethodView):
 @auth_required
 def groceryList(userId):
     ingredients = request.get_json()["ingredients"]
-    preds = makePrediction(ingredients)
+    preds = makePrediction([ingredient["ingredient"] for ingredient in ingredients])
     dct = {}
     labels = set(preds)
     for label in labels:
