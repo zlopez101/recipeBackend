@@ -27,7 +27,6 @@ def Recipes() -> list:
                 "yum yum sauce and sesame seeds  for serving ",
             ],
             "url": "https://www.halfbakedharvest.com/korean-bulgogi-bbq-chicken/",
-            "userId": 12345678,
         },
         {
             "name": "Super Simple Coconut Chicken Tikka Masala. ",
@@ -50,7 +49,6 @@ def Recipes() -> list:
                 "3 cups cooked rice  for serving ",
             ],
             "url": "https://www.halfbakedharvest.com/chicken-tikka-masala/",
-            "userId": 12345678,
         },
         {
             "name": "Queso Fundido Taquitos. ",
@@ -72,7 +70,6 @@ def Recipes() -> list:
                 "flaky salt ",
             ],
             "url": "https://www.halfbakedharvest.com/queso-fundido-taquitos/",
-            "userId": 12345678,
         },
     ]
 

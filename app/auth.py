@@ -1,6 +1,6 @@
 from flask import request, abort
 from functools import wraps
-from app.controllers import UserController
+from app.controllers import UserController, RecipeController
 
 
 class AuthError(Exception):
@@ -49,7 +49,7 @@ def get_token_auth_header():
     return token
 
 
-def auth_required(func):
+def user_auth_required(func):
     @wraps(func)
     def route_wrapper(*args, **kwargs):
         token = get_token_auth_header()
@@ -58,3 +58,12 @@ def auth_required(func):
 
     return route_wrapper
 
+
+def recipe_auth_required(func):
+    @wraps(func)
+    def route_wrapper(*args, **kwargs):
+        token = get_token_auth_header()
+        userId = UserController.decodeToken(token)
+        return func(RecipeController(userId), *args, **kwargs)
+
+    return route_wrapper

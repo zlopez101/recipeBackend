@@ -1,4 +1,4 @@
-from app.auth import auth_required
+from app.auth import *
 from app.controllers.recipe import RecipeController
 from app.utils import getRecipe, validate_json
 from bson import ObjectId
@@ -11,34 +11,34 @@ recipeService = Blueprint("recipe_service", __name__)
 
 
 class RecipeAPI(MethodView):
-    def get(self, userId, recipeId):
+    def get(self, controller, recipeId):
         if recipeId is None:
             # return a list of recipes
-            return jsonify(RecipeController.getRecipes(userId))
+            return jsonify(controller.getRecipes())
         else:
             # expose a single recipe
-            return RecipeController.getRecipe(recipeId)
+            return controller.getRecipe(recipeId)
 
     def post(
-        self, userId,
+        self, controller,
     ):
         # create a new recipe
         recipeURL = request.get_json()["url"]
-        recipe = getRecipe(recipeURL, userId)
-        return RecipeController.createRecipe(recipe)
+        recipe = getRecipe(recipeURL, controller.userId)
+        return controller.createRecipe(recipe)
 
-    def delete(self, userId, recipeId):
+    def delete(self, controller, recipeId):
         # delete a single recipe
-        RecipeController.deleteRecipe(recipeId)
+        controller.deleteRecipe(recipeId)
         return "deleted"
 
-    def put(self, userId, recipeId):
+    def put(self, controller, recipeId):
         # update a single recipe
         pass
 
 
 @recipeService.route("/api/groceryList", methods=["POST"])
-@auth_required
+@user_auth_required
 def groceryList(userId):
     ingredients = request.get_json()["ingredients"]
     preds = makePrediction([ingredient["ingredient"] for ingredient in ingredients])
@@ -51,7 +51,7 @@ def groceryList(userId):
     return dct
 
 
-recipe_view = auth_required(RecipeAPI.as_view("recipes"))
+recipe_view = recipe_auth_required(RecipeAPI.as_view("recipes"))
 recipeService.add_url_rule(
     "/api/recipes",
     defaults={"recipeId": None},

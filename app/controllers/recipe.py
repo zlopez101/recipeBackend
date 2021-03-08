@@ -4,6 +4,13 @@ import app.db
 
 
 class RecipeController(baseController):
+    def __init__(self, userId):
+        self.userId = userId
+        self.db = app.db.pymongo.db.recipes
+
+    def response_headers(self):
+        pass
+
     @staticmethod
     def createIngredientObj(recipe: dict) -> dict:
         """New method for storing inactive objects in the frontend will be in the store
@@ -20,8 +27,7 @@ class RecipeController(baseController):
         ]
         return recipe
 
-    @staticmethod
-    def getRecipe(_id: str) -> dict:
+    def getRecipe(self, _id: str) -> dict:
         """Get a single recipe
 
         :param _id: _id provided by frontend
@@ -30,7 +36,7 @@ class RecipeController(baseController):
         :rtype: dict
         """
         result = baseController.processResponse(
-            app.db.pymongo.db.recipes.find_one({"_id": ObjectId(_id)})
+            self.db.find_one({"_id": ObjectId(_id)})
         )
 
         result["newIngredients"] = []
@@ -46,20 +52,15 @@ class RecipeController(baseController):
         result["ingredients"] = result.pop("newIngredients")
         return result
 
-    @staticmethod
-    def getRecipes(userId) -> list:
+    def getRecipes(self) -> list:
         """Get all recipes
 
         :return: list of recipe objects 
         :rtype: list
         """
-        # user = app.db.pymongo.db.users.find_one(
-        # {"_id": ObjectId("5febad07b771396bbea8d358")}
-        # )
-        recipes = app.db.pymongo.db.recipes.find({"userId": userId})
+        recipes = self.db.find({"userId": self.userId})
 
-        result = [baseController.processResponse(recipe) for recipe in recipes]
-
+        result = [self.processResponse(recipe) for recipe in recipes]
         for recipe in result:
             recipe["newIngredients"] = []
             for index, ingredient in enumerate(recipe["ingredients"]):
@@ -72,20 +73,19 @@ class RecipeController(baseController):
                     }
                 )
             recipe["ingredients"] = recipe.pop("newIngredients")
+
         return result
 
-    @staticmethod
-    def deleteRecipe(_id: str) -> None:
+    def deleteRecipe(self, _id: str) -> None:
         """Deletes recipes
 
         :param _id: id provided by frontend
         :type _id: str
         """
-        app.db.pymongo.db.recipes.delete_one({"_id": ObjectId(_id)})
+        self.db.delete_one({"_id": ObjectId(_id)})
         return None
 
-    @staticmethod
-    def createRecipe(recipe: dict) -> str:
+    def createRecipe(self, recipe: dict) -> str:
         """create a new recipe
 
         :param recipe: dict created from `getRecipe`
@@ -93,5 +93,6 @@ class RecipeController(baseController):
         :return: ID of newly created recipe
         :rtype: str
         """
-        newRecipe = app.db.pymongo.db.recipes.insert_one(recipe)
+        recipe["userId"] = self.userId
+        newRecipe = self.db.insert_one(recipe)
         return str(newRecipe.inserted_id)

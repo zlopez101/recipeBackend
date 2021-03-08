@@ -9,10 +9,10 @@ import os
 
 class UserController(baseController):
     key = os.environ.get("FLASK_APP_BUILDING_KEY")
-    attributes = ["fname", "lname", "email", "phone_number", "password", "id"]
 
     def __init__(self, kwargs):
-        super().__init__(kwargs)
+        for k, v in kwargs.items():
+            self.__setattr__(k, v)
 
     def __repr__(self):
         return f"User({self._id})"
@@ -40,6 +40,7 @@ class UserController(baseController):
         :return: Instance of UserController
         :rtype: UserController
         """
+
         user = UserController.get({"_id": ObjectId(_id)})
         return cls(user)
 
@@ -52,13 +53,14 @@ class UserController(baseController):
         :return: UserController instance for 
         :rtype: UserController
         """
+
         user = UserController.get({"email": suppliedUserData.get("email")})
         if bcrypt.check_password_hash(user["password"], suppliedUserData["password"]):
             return cls(user)
 
     @classmethod
     def createFromRegistration(cls, userObj: dict):
-        """register a new user
+        """register a new user. Creates a new field with {"active": False}
 
         :param userObj: dict with keys from Vue frontend
         :type userObj: dict
@@ -67,7 +69,21 @@ class UserController(baseController):
         """
         user = userObj.copy()
         user["password"] = bcrypt.generate_password_hash(user.pop("password"))
+        # set equal to True when the event checkout.session.completed
+        user["active"] = False
         app.db.pymongo.db.users.insert_one(user)
+        return cls(UserController.processResponse(user))
+
+    @classmethod
+    def createFromStripe(cls, stripeId: str):
+        """create the user
+
+        :param stripeId: stripe id returned from the event webhook
+        :type stripeId: string
+        :return: UserController instance   
+        :rtype: UserController
+        """
+        user = UserController.get({"stripe_customer_id": stripeId})
         return cls(UserController.processResponse(user))
 
     @staticmethod
@@ -93,6 +109,27 @@ class UserController(baseController):
             "userID": self.id,
         }
         return jwt.encode(payload, UserController.key, algorithm="HS256")
+
+    def createTimer(self, timer: int = 31):
+        """create a timer token that can be decoded within timer days
+
+        :param timer: Amount of days for the timer to active, defaults to 31
+        :type timer: int, optional
+        """
+        payload = {
+            "exp": datetime.utcnow() + timedelta(days=timer),
+            "iat": datetime.utcnow(),
+            "userID": self.id,
+        }
+        token = jwt.encode(payload, UserController.key, algorithm="HS256")
+        self.set(timerToken=token)
+
+    def set(self, **kwargs):
+        """Update the UserController Instance to include"""
+        dct = {"users." + key: value for key, value in kwargs.items()}
+        return app.db.pymongo.db.users.update_one(
+            {"_id": ObjectId(self.id)}, {"$set": kwargs}
+        )
 
     @staticmethod
     def decodeToken(token: str) -> str:

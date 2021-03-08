@@ -31,8 +31,10 @@ def create_app(config_class=Configuration):
     from app.recipe_service import recipeService
     from app.input_service import inputService
     from app.user_service import userService
+    from app.stripe_service import stripe_service
 
     myapp.register_blueprint(recipeService)
     myapp.register_blueprint(inputService)
     myapp.register_blueprint(userService)
+    myapp.register_blueprint(stripe_service)
     return myapp

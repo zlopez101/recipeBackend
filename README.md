@@ -15,3 +15,8 @@ mkl-fft==1.2.0
 ## deploy
 
 `git push heroku main`
+
+### stripe CLI commands
+
+In anaconda prompt
+cd onedrive/desktop/stripe_1.5.9_windows_x86_64

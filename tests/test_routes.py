@@ -46,8 +46,11 @@ def test_recipe_routes(test_client):
 
     first, second = JimsRecipes
     assert first["name"] == recipes[0]["name"], "Not doing a full comparsion"
+    secondIngredients = [
+        ingredient["ingredient"] for ingredient in second["ingredients"]
+    ]
     assert (
-        second["ingredients"] == recipes[1]["ingredients"]
+        secondIngredients == recipes[1]["ingredients"]
     ), "Since API adds userId and id"
     assert first["userId"] == second["userId"], "userId should match"
 
