@@ -15,6 +15,8 @@ def handleCheckoutSessionCompleted(event: dict) -> bool:
     print("handling checkout.session.completed...")
     try:
         user = UserController.getFromId(event["data"]["object"]["client_reference_id"])
+        stripe_customer_id = event["data"]["object"]["customer"]
+        user.set(stripe_customer_id=stripe_customer_id)
         user.createTimer()
         user.set(active=True)
         return True

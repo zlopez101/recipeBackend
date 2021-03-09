@@ -9,6 +9,7 @@ import os
 
 class UserController(baseController):
     key = os.environ.get("FLASK_APP_BUILDING_KEY")
+    db = app.db.pymongo.db.users
 
     def __init__(self, kwargs):
         for k, v in kwargs.items():
@@ -29,7 +30,7 @@ class UserController(baseController):
         :return: cursor (list) of documents
         :rtype: list
         """
-        return app.db.pymongo.db.users.find(parameters)
+        return UserController.db.find(parameters)
 
     @classmethod
     def getFromId(cls, _id: str):
@@ -95,7 +96,7 @@ class UserController(baseController):
             # set equal to True when the event checkout.session.completed
             user["active"] = False
 
-        app.db.pymongo.db.users.insert_one(user)
+        UserController.db.insert_one(user)
         return cls(UserController.processResponse(user))
 
     @classmethod
@@ -117,7 +118,7 @@ class UserController(baseController):
         :return: user instance based on phone number
         :rtype: dict
         """
-        return UserController.processResponse(app.db.pymongo.db.users.find_one(data))
+        return UserController.processResponse(UserController.db.find_one(data))
 
     def encodeToken(self) -> bytes:
         """create a token to return to Vue Frontend
@@ -151,7 +152,7 @@ class UserController(baseController):
     def set(self, **kwargs):
         """Update the UserController Instance to include"""
         dct = {"users." + key: value for key, value in kwargs.items()}
-        return app.db.pymongo.db.users.update_one(
+        return UserController.db.update_one(
             {"_id": ObjectId(self.id)}, {"$set": kwargs}
         )
 

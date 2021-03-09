@@ -1,11 +1,11 @@
 from flask import Blueprint, request, redirect, url_for, current_app, jsonify
 from bson import ObjectId
-from app.controllers.user import UserController
+from app.controllers import UserController, BlackListToken
 import json
 from app.utils import validate_json
 import stripe
 
-from app.auth import user_auth_required
+from app.auth import user_auth_required, get_token_auth_header
 
 userService = Blueprint("user_service", __name__)
 
@@ -53,19 +53,48 @@ def login():
 
 
 @userService.route("/api/logout", methods=["POST"])
-@user_auth_required
-def logout(user):
-    return f"{user.fname} {user.lname} signed out!"
+def logout():
+    """Accept Vue Frontend token, add to mongodb blacklisted Collection
+
+    :return: 201,
+    :rtype: int
+    """
+    try:
+        token = get_token_auth_header()
+        blacklisted = BlackListToken(token)
+        blacklisted.addToDB()
+        return "added", 201
+    except Exception as e:
+        print(e)
+        return "failed", 500
 
 
 @userService.route("/api/account")
 @user_auth_required
-def account():
+def account(user):
     pass
 
 
 @userService.route("/api/settings")
 @user_auth_required
-def settings():
+def settings(user):
     pass
+
+
+@userService.route("/api/billing")
+@user_auth_required
+def biling(user):
+    stripe.api_key = current_app.config["STRIPE_API_KEY"]
+    baseUrl = request.headers.get("referer", "https://localhost:5000/")
+    try:
+        session = stripe.billing_portal.Session.create(
+            customer=user.stripe_customer_id, return_url=baseUrl + "account"
+        )
+        return jsonify({"url": session.url})
+    except AttributeError as e:
+        print(e)
+        return jsonify({"url": "", "code": "error", "msg": "there was an error"})
+    except stripe.error.InvalidRequestError as e:
+        print(e)
+        return jsonify({"url": "", "code": "error", "msg": "there was an error"})
 
