@@ -87,6 +87,7 @@ def Users() -> list:
             "phone_number": "+11234567890",
             "email": "JimBob@gmail.com",
             "password": "JimIsCool",
+            "active": True,
         },
         {
             "fname": "Kim",
@@ -94,5 +95,6 @@ def Users() -> list:
             "phone_number": "+098754321",
             "email": "KimSue@gmail.com",
             "password": "KimIsCool",
+            "active": True,
         },
     ]

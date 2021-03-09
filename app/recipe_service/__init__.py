@@ -11,7 +11,27 @@ recipeService = Blueprint("recipe_service", __name__)
 
 
 class RecipeAPI(MethodView):
+    def auth_status(func):
+        """Works active status to make sure each user identified 
+
+        :param func: [description]
+        :type func: [type]
+        """
+
+        def inner_func(*args, **kwargs):
+
+            # can't directly reference the controller
+            # index args to controller then check the .active attribute
+            if args[1].active:
+                return func(*args, **kwargs)
+            else:
+                return jsonify({"message": "invalid token"})
+
+        return inner_func
+
+    @auth_status
     def get(self, controller, recipeId):
+
         if recipeId is None:
             # return a list of recipes
             return jsonify(controller.getRecipes())
@@ -19,6 +39,7 @@ class RecipeAPI(MethodView):
             # expose a single recipe
             return controller.getRecipe(recipeId)
 
+    @auth_status
     def post(
         self, controller,
     ):
@@ -27,11 +48,13 @@ class RecipeAPI(MethodView):
         recipe = getRecipe(recipeURL, controller.userId)
         return controller.createRecipe(recipe)
 
+    @auth_status
     def delete(self, controller, recipeId):
         # delete a single recipe
         controller.deleteRecipe(recipeId)
         return "deleted"
 
+    @auth_status
     def put(self, controller, recipeId):
         # update a single recipe
         pass

@@ -4,8 +4,9 @@ import app.db
 
 
 class RecipeController(baseController):
-    def __init__(self, userId):
+    def __init__(self, userId: str, active: bool):
         self.userId = userId
+        self.active = active
         self.db = app.db.pymongo.db.recipes
 
     def response_headers(self):

@@ -53,8 +53,8 @@ def user_auth_required(func):
     @wraps(func)
     def route_wrapper(*args, **kwargs):
         token = get_token_auth_header()
-        userId = UserController.decodeToken(token)
-        return func(userId, *args, **kwargs)
+        user = UserController.getFromToken(token)
+        return func(user, *args, **kwargs)
 
     return route_wrapper
 
@@ -63,7 +63,7 @@ def recipe_auth_required(func):
     @wraps(func)
     def route_wrapper(*args, **kwargs):
         token = get_token_auth_header()
-        userId = UserController.decodeToken(token)
-        return func(RecipeController(userId), *args, **kwargs)
+        user = UserController.getFromToken(token)
+        return func(RecipeController(user.id, user.active), *args, **kwargs)
 
     return route_wrapper

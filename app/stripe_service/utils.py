@@ -35,7 +35,7 @@ def handleInvoicePaid(event: dict) -> bool:
     :return: True if handled successfully
     :rtype: bool
     """
-    print(f"{} is handling the event")
+    print(f"handling invoice.paid event...")
     return True
 
 

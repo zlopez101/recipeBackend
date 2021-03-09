@@ -33,13 +33,32 @@ class UserController(baseController):
 
     @classmethod
     def getFromId(cls, _id: str):
-        """creates the User object from _id. Used after token validation
+        """creates the User object from token. Used after token validation
 
-        :param _id: str of userId decoded from token
-        :type _id: str
+        :param token: str of userId decoded from token
+        :type token: str
         :return: Instance of UserController
         :rtype: UserController
         """
+        user = UserController.get({"_id": ObjectId(_id)})
+        return cls(user)
+
+    @classmethod
+    def getFromToken(cls, token: str):
+        """creates the User object from token. Used after token validation
+
+        :param token: str of userId decoded from token
+        :type token: str
+        :return: Instance of UserController
+        :rtype: UserController
+        """
+        try:
+            payload = jwt.decode(token, UserController.key, algorithms="HS256")
+            _id = payload.get("userID")
+        except jwt.ExpiredSignatureError:
+            return "Signature expired. Please log in again."
+        except jwt.InvalidTokenError:
+            return "Invalid token. Please log in again."
 
         user = UserController.get({"_id": ObjectId(_id)})
         return cls(user)
@@ -53,7 +72,6 @@ class UserController(baseController):
         :return: UserController instance for 
         :rtype: UserController
         """
-
         user = UserController.get({"email": suppliedUserData.get("email")})
         if bcrypt.check_password_hash(user["password"], suppliedUserData["password"]):
             return cls(user)
@@ -69,8 +87,14 @@ class UserController(baseController):
         """
         user = userObj.copy()
         user["password"] = bcrypt.generate_password_hash(user.pop("password"))
-        # set equal to True when the event checkout.session.completed
-        user["active"] = False
+
+        # if active is already defined, for the testing
+        if user.get("active"):
+            pass
+        else:
+            # set equal to True when the event checkout.session.completed
+            user["active"] = False
+
         app.db.pymongo.db.users.insert_one(user)
         return cls(UserController.processResponse(user))
 
@@ -131,19 +155,3 @@ class UserController(baseController):
             {"_id": ObjectId(self.id)}, {"$set": kwargs}
         )
 
-    @staticmethod
-    def decodeToken(token: str) -> str:
-        """decode a provided token
-
-        :param token: token from Vue Frontend
-        :type token: str
-        :return: ID of user
-        :rtype: str
-        """
-        try:
-            payload = jwt.decode(token, UserController.key, algorithms="HS256")
-            return payload.get("userID")
-        except jwt.ExpiredSignatureError:
-            return "Signature expired. Please log in again."
-        except jwt.InvalidTokenError:
-            return "Invalid token. Please log in again."

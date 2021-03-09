@@ -1,11 +1,11 @@
 import pytest
 from tests.modelTesting import *
-from app.controllers import RecipeController, UserController
+from app.controllers import RecipeController, UserController, BlackListToken
 
 
 def test_Recipes(models):
     first, second, third = Recipes()
-    controller = RecipeController("602b77e223b58c90325936d8")
+    controller = RecipeController("602b77e223b58c90325936d8", True)
     # create a recipe, then retrieve it using the id
     first_id = controller.createRecipe(first)
     recipe = controller.getRecipe(first_id)
@@ -48,8 +48,8 @@ def test_Users(models):
     # give the token back to the frontend
     # do some stuff
     # frontend submits a request to an auth_required route
-    jim_id = UserController.decodeToken(token)
-    assert jim.id == jim_id
+    _jim = UserController.getFromToken(token)
+    assert jim.id == _jim.id
 
     # register Kim
     kimInDB = UserController.createFromRegistration(Kim)
@@ -58,3 +58,15 @@ def test_Users(models):
     kim = UserController.getFromId(kimInDB.id)
     assert isinstance(kim, UserController)
     assert str(kim) == "Kim Sue"
+
+
+def test_BlackList(models):
+
+    # general set up
+    Jim, Kim = Users()
+    for user in Users():
+        user_in_db = UserController.createFromRegistration(user)
+        users_token = user_in_db.encodeToken()
+        token = BlackListToken(users_token)
+        token.addToDB()
+

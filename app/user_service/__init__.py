@@ -45,12 +45,6 @@ def register():
         return jsonify({"error": {"message": str(e)}}), 400
 
 
-@userService.route("/api/activeUser", methods=["POST"])
-def activate():
-    user = UserController.fromLogin(request.get_json())
-    return user.encodeToken()
-
-
 @userService.route("/api/login", methods=["POST"])
 @validate_json("email", "password")
 def login():
@@ -60,10 +54,8 @@ def login():
 
 @userService.route("/api/logout", methods=["POST"])
 @user_auth_required
-def logout(userId):
-    # print(userId)
-    user = UserController.getFromId(userId)
-    return f"{user} signed out!"
+def logout(user):
+    return f"{user.fname} {user.lname} signed out!"
 
 
 @userService.route("/api/account")
